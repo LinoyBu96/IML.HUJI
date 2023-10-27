@@ -1,16 +1,9 @@
-"""
-The following file contains base classes for all estimators.
-Class design and part of the code is taken and/or influenced
-by the Python scikit-learn package, and specifically the
-BaseEstimator.py file
-
-# Author: Gilad Green <iml@mail.huji.ac.il>
-# License: BSD 3 clause
-"""
-from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import NoReturn
+import math
+from typing import Tuple
 import numpy as np
+import pandas as pd
+
+
 
 
 class BaseEstimator(ABC):
@@ -170,3 +163,55 @@ class BaseEstimator(ABC):
         """
         self.fit(X, y)
         return self.predict(X)
+
+
+
+
+def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .75) \
+        -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+    """
+    Randomly split given sample to a training- and testing sample
+    Parameters
+    ----------
+    X : DataFrame of shape (n_samples, n_features)
+        Data frame of samples and feature values.
+    y : Series of shape (n_samples, )
+        Responses corresponding samples in data frame.
+    train_proportion: Fraction of samples to be split as training set
+    Returns
+    -------
+    train_X : DataFrame of shape (ceil(train_proportion * n_samples), n_features)
+        Design matrix of train set
+    train_y : Series of shape (ceil(train_proportion * n_samples), )
+        Responses of training samples
+    test_X : DataFrame of shape (floor((1-train_proportion) * n_samples), n_features)
+        Design matrix of test set
+    test_y : Series of shape (floor((1-train_proportion) * n_samples), )
+        Responses of test samples
+    """
+    inds = np.random.choice(y.shape[0], size=math.ceil(X.shape[0] * train_proportion), replace=False)
+    labels_to_remove = (y.keys())[inds]
+    #print("ok", labels_to_remove)
+    #X.iloc[inds]
+    #y.iloc[inds]
+
+    return X.iloc[inds], y.iloc[inds], X.drop(labels_to_remove, axis=0), y.drop(labels_to_remove)
+
+
+def confusion_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    """
+    Compute a confusion matrix between two sets of integer vectors
+    Parameters
+    ----------
+    a: ndarray of shape (n_samples,)
+        First vector of integers
+    b: ndarray of shape (n_samples,)
+        Second vector of integers
+    Returns
+    -------
+    confusion_matrix: ndarray of shape (a_unique_values, b_unique_values)
+        A confusion matrix where the value of the i,j index shows the number of times value `i` was found in vector `a`
+        while value `j` vas found in vector `b`
+    """
+    raise NotImplementedError()
+
